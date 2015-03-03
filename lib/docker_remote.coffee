@@ -17,9 +17,14 @@ class DockerRemote
 
     container
 
+  @spawn: (stdio="pipe") ->
+    spawn = new DockerRemote.Spawn(stdio: stdio)
+    spawn.spawn.bind(spawn)
+
 require("./docker_remote/api")(DockerRemote)
 require("./docker_remote/args")(DockerRemote)
 require("./docker_remote/container")(DockerRemote)
 require("./docker_remote/image")(DockerRemote)
+require("./docker_remote/spawn")(DockerRemote)
 
 module.exports = DockerRemote

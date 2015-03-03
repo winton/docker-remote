@@ -1,6 +1,4 @@
-Promise  = require "bluebird"
-spawn    = require("../spawn")("inherit")
-spawnOut = require("../spawn")()
+Promise = require "bluebird"
 
 module.exports = (DockerRemote) -> 
 
@@ -13,7 +11,11 @@ module.exports = (DockerRemote) ->
     # @param [Object] @container container object
     #
     constructor: (@container) ->
+      DockerRemote.modifyContainer(@container)
+
       @api      = new DockerRemote.Api.Image(@container)
+      @spawn    = DockerRemote.spawn("inherit")
+      @spawnOut = DockerRemote.spawn()
       @commands =
         app_sha:   "git rev-parse HEAD"
         clone_app:
@@ -31,7 +33,7 @@ module.exports = (DockerRemote) ->
     #   finishes 
     #
     appSha: ->
-      spawnOut(
+      @spawnOut(
         @commands.app_sha
         cwd: ".tmp/#{@container.name}"
       )
@@ -73,7 +75,7 @@ module.exports = (DockerRemote) ->
       props.sha      = sha.substring(0,8)
       @container.tag = props.sha
 
-      spawn(@buildImageCommand(props.sha))
+      @spawn(@buildImageCommand(props.sha))
 
     # Generates the `docker build` command.
     #
@@ -94,7 +96,7 @@ module.exports = (DockerRemote) ->
     #
     checkContainerSha: (run_sha) ->
       run_sha = run_sha.substring(0, 12)
-      spawnOut("docker ps").then(
+      @spawnOut("docker ps").then(
         (output) =>
           !!output.match(///#{run_sha}\s+///g)
       )
@@ -126,7 +128,7 @@ module.exports = (DockerRemote) ->
     # @return [Promise] promise that resolves when command finishes 
     #
     cloneApp: ->
-      spawnOut(@commands.clone_app)
+      @spawnOut(@commands.clone_app)
 
     # Command to commit the container generated from the post build
     # command.
@@ -143,7 +145,7 @@ module.exports = (DockerRemote) ->
     #
     commitContainer: (props) ->
       if @container.build
-        spawnOut(@commitCommand(props.run_sha))
+        @spawnOut(@commitCommand(props.run_sha))
 
     # Create the Docker image if it doesn't already exist.
     #
@@ -157,7 +159,7 @@ module.exports = (DockerRemote) ->
     # @return [Promise] promise that resolves when command finishes 
     #
     mkdirApp: ->
-      spawnOut(@commands.mkdir_app)
+      @spawnOut(@commands.mkdir_app)
 
     # Pushes the docker image to the registry.
     #
@@ -166,8 +168,8 @@ module.exports = (DockerRemote) ->
     #
     pushImage: (props) ->
       if @container.push
-        spawn(@pushImageCommand(props.sha)).then =>
-          spawn(@pushImageCommand("latest"))
+        @spawn(@pushImageCommand(props.sha)).then =>
+          @spawn(@pushImageCommand("latest"))
 
     # Generates the `docker push` command.
     #
@@ -182,7 +184,7 @@ module.exports = (DockerRemote) ->
     # @return [Promise] promise that resolves when command finishes 
     #
     rmrfApp: ->
-      spawnOut(@commands.rmrf_app)
+      @spawnOut(@commands.rmrf_app)
 
     # Run the post build command.
     #
@@ -217,9 +219,9 @@ module.exports = (DockerRemote) ->
     #
     tagContainer: (props) ->
       if @container.build
-        spawnOut(@tagCommand("latest", props.sha))
+        @spawnOut(@tagCommand("latest", props.sha))
       else
-        spawnOut(@tagCommand(props.sha))
+        @spawnOut(@tagCommand(props.sha))
 
     # Wait for post build commands to finish.
     #
