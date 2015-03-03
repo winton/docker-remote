@@ -145,7 +145,7 @@ module.exports = (DockerRemote) ->
       if @container.build
         spawnOut(@commitCommand(props.run_sha))
 
-    # Create the Docker image if it should already exist.
+    # Create the Docker image if it doesn't already exist.
     #
     # @return [Promise] promise that resolves when API call finishes
     #
