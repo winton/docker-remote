@@ -13,6 +13,8 @@ module.exports = (DockerRemote) ->
     #   command (typically "run" or "build")
     #
     constructor: (@container, @run_key="run") ->
+      DockerRemote.modifyContainer(@container)
+      
       @api = new DockerRemote.Api.Container(@container)
 
     # List Docker containers.
