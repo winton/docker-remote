@@ -33,7 +33,7 @@ The container object has the following possible keys:
 
 * `build` - The command to run within the Docker container after building the image, before pushing (optional).
 * `env` - Object containing environmental variables (optional).
-* `git` - A git repository URL string (required).
+* `git` - A git repository URL string (optional).
 * `name` - The name of the container (required).
 * `ports` - An array of port strings in "[host-port]:[container-port]" format (optional).
 * `repo` - The Docker repository to push to on build (optional).

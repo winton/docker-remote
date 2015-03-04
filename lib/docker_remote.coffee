@@ -9,7 +9,8 @@ class DockerRemote
   # @return [Object] container container object
   #
   @modifyContainer: (container) ->
-    [ container.git, container.branch ] = container.git.split("#")
+    if container.git
+      [ container.git, container.branch ] = container.git.split("#")
 
     container.branch  ||= "master"
     container.ports   ||= []
