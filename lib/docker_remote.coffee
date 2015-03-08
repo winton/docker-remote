@@ -13,6 +13,7 @@ class DockerRemote
       [ container.git, container.branch ] = container.git.split("#")
 
     container.branch  ||= "master"
+    container.tag     ||= "latest"
     container.ports   ||= []
     container.volumes ||= []
 

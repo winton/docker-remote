@@ -20,7 +20,7 @@ module.exports = (Docker) ->
     create: ->
       @client.createImage(
         fromImage: @container.repo
-        tag: "latest"
+        tag: @container.tag
       )
 
     # List Docker images.

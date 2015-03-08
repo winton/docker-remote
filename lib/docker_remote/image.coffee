@@ -169,7 +169,7 @@ module.exports = (DockerRemote) ->
     pushImage: (props) ->
       if @container.push
         @spawn(@pushImageCommand(props.sha)).then =>
-          @spawn(@pushImageCommand("latest"))
+          @spawn(@pushImageCommand(@container.tag))
 
     # Generates the `docker push` command.
     #
@@ -205,7 +205,7 @@ module.exports = (DockerRemote) ->
     # @param [String] dest the destination tag
     # @return [String] the docker tag command
     #
-    tagCommand: (source, dest="latest") ->
+    tagCommand: (source, dest) ->
       """
       docker tag \
         #{@container.repo}:#{source} \
@@ -219,9 +219,9 @@ module.exports = (DockerRemote) ->
     #
     tagContainer: (props) ->
       if @container.build
-        @spawnOut(@tagCommand("latest", props.sha))
+        @spawnOut(@tagCommand(@container.tag, props.sha))
       else
-        @spawnOut(@tagCommand(props.sha))
+        @spawnOut(@tagCommand(props.sha, @container.tag))
 
     # Wait for post build commands to finish.
     #

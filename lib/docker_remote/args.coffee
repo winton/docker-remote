@@ -92,7 +92,7 @@ module.exports = (DockerRemote) ->
       ports
 
     image: ->
-      "#{@container.repo}:#{@container.tag || "latest"}"
+      "#{@container.repo}:#{@container.tag}"
 
     # Generate an object for the `PortBindings` option of the
     # Docker API.
