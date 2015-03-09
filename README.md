@@ -38,6 +38,7 @@ The container object has the following possible keys:
 * `ports` - An array of port strings in "[host-port]:[container-port]" format (optional).
 * `repo` - The Docker repository to push to on build (optional).
 * `run` - The command to run within the Docker container (optional).
+* `tags` - An array of tags to use when building the image
 * `volumes` - An array of volume strings in "[host-dir]:[container-dir]:[rw|ro]" format (optional).
 
 ## Dev setup

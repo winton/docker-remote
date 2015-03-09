@@ -52,7 +52,8 @@ module.exports = (DockerRemote) ->
       ).then(
         => @appSha()
       ).then(
-        (sha) => @buildImage(props, sha)
+        (sha) =>
+          @buildImage(sha)
       ).then(
         => @runPostBuild(props)
       ).then(
@@ -67,25 +68,21 @@ module.exports = (DockerRemote) ->
 
     # Runs `docker build` on the app code.
     #
-    # @param [Object] props shared properties from `build`
     # @param [String] sha the sha of the app code
     # @return [Promise] promise that resolves when command finishes 
     #
-    buildImage: (props, sha) ->
-      props.sha      = sha.substring(0,8)
-      @container.tag = props.sha
-
-      @spawn(@buildImageCommand(props.sha))
+    buildImage: (sha) ->
+      @container.tag = sha.substring(0,8)
+      @spawn(@buildImageCommand())
 
     # Generates the `docker build` command.
     #
-    # @param [String] sha the git sha hash of the project
     # @return [String] the docker build command
     #
-    buildImageCommand: (sha) ->
+    buildImageCommand: ->
       """
       docker build \
-        -t #{@container.repo}:#{sha} \
+        -t #{@container.repo}:#{@container.tag} \
         .tmp/#{@container.name}
       """
 
@@ -168,16 +165,17 @@ module.exports = (DockerRemote) ->
     #
     pushImage: (props) ->
       if @container.push
-        @spawn(@pushImageCommand(props.sha)).then =>
-          @spawn(@pushImageCommand(@container.tag))
+        promise = @spawn(@pushImageCommand())
+        for tag in @container.tags
+          promise = promise.then => @spawn(@pushImageCommand(tag))
 
     # Generates the `docker push` command.
     #
-    # @param [String] sha the git sha hash of the project
+    # @param [String] tag the tag to push
     # @return [String] the docker push command
     #
-    pushImageCommand: (sha) ->
-      "docker push #{@container.repo}:#{sha}"
+    pushImageCommand: (tag=@container.tag) ->
+      "docker push #{@container.repo}:#{tag}"
 
     # Remove the app code in the `.tmp` directory.
     #
@@ -196,7 +194,8 @@ module.exports = (DockerRemote) ->
 
       if @container.build
         container.run().then(
-          (output) -> props.run_sha = output.id
+          (output) ->
+            props.run_sha = output.id
         )
 
     # Generates the `docker tag` command.
@@ -218,10 +217,10 @@ module.exports = (DockerRemote) ->
     # @return [Promise] promise that resolves when command finishes
     #
     tagContainer: (props) ->
-      if @container.build
-        @spawnOut(@tagCommand(@container.tag, props.sha))
-      else
-        @spawnOut(@tagCommand(props.sha, @container.tag))
+      promise = Promise.resolve()
+      for tag in @container.tags
+        promise = promise.then =>
+          @spawnOut(@tagCommand(@container.tag, tag))
 
     # Wait for post build commands to finish.
     #

@@ -12,10 +12,11 @@ class DockerRemote
     if container.git
       [ container.git, container.branch ] = container.git.split("#")
 
-    container.branch  ||= "master"
-    container.tag     ||= "latest"
     container.ports   ||= []
+    container.tags    ||= []
     container.volumes ||= []
+    container.branch  ||= "master"
+    container.tag     ||= container.tags[0] || "latest"
 
     container
 
