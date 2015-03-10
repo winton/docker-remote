@@ -32,6 +32,7 @@ Wrapper for the Docker remote API and CLI.
 The container object has the following possible keys:
 
 * `build` - The command to run within the Docker container after building the image, before pushing (optional).
+* `dockerfile` - The directory to discover the Dockerfile (optional).
 * `env` - Object containing environmental variables (optional).
 * `git` - A git repository URL string (optional).
 * `name` - The name of the container (required).
