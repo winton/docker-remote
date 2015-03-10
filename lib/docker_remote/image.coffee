@@ -48,7 +48,7 @@ module.exports = (DockerRemote) ->
       promise = null
 
       if @container.dockerfile && @container.dockerfile.indexOf(".tmp/") == -1
-        promise = Promise.resolve("dev")
+        promise = Promise.resolve(@container.tags.shift())
       else
         promise = @rmrfApp().then(
           => @mkdirApp()

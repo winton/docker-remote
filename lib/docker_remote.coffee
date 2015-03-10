@@ -14,8 +14,7 @@ class DockerRemote
 
     container.branch  ||= "master"
     container.ports   ||= []
-    container.tags    ||= [ "latest" ]
-    container.tag     ||= container.tags[0]
+    container.tags    ||= []
     container.volumes ||= []
 
     container
