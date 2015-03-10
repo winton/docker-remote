@@ -1,4 +1,5 @@
 Promise = require "bluebird"
+path    = require "path"
 
 module.exports = (DockerRemote) -> 
 
@@ -43,17 +44,22 @@ module.exports = (DockerRemote) ->
     # @return [Promise<String,Number>] the output and exit code
     #
     build: ->
-      props = {}
+      props   = {}
+      promise = null
 
-      @rmrfApp().then(
-        => @mkdirApp()
-      ).then(
-        => @cloneApp()
-      ).then(
-        => @appSha()
-      ).then(
-        (sha) =>
-          @buildImage(sha)
+      if @container.dockerfile && @container.dockerfile.indexOf(".tmp/") == -1
+        promise = Promise.resolve("dev")
+      else
+        promise = @rmrfApp().then(
+          => @mkdirApp()
+        ).then(
+          => @cloneApp()
+        ).then(
+          => @appSha()
+        )
+
+      promise.then(
+        (sha) => @buildImage(sha)
       ).then(
         => @runPostBuild(props)
       ).then(
@@ -80,10 +86,13 @@ module.exports = (DockerRemote) ->
     # @return [String] the docker build command
     #
     buildImageCommand: ->
+      app_dir   = path.resolve @container.dockerfile
+      app_dir ||= ".tmp/#{@container.name}"
+
       """
       docker build \
         -t #{@container.repo}:#{@container.tag} \
-        .tmp/#{@container.name}
+        #{app_dir}
       """
 
     # Check `docker ps` for the existence of a container sha.
