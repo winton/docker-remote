@@ -37,7 +37,8 @@ module.exports = (DockerRemote) ->
       @spawnOut(
         @commands.app_sha
         cwd: ".tmp/#{@container.name}"
-      )
+      ).then (sha) ->
+        sha.substring(0,8)
 
     # Builds an image.
     #
@@ -74,11 +75,11 @@ module.exports = (DockerRemote) ->
 
     # Runs `docker build` on the app code.
     #
-    # @param [String] sha the sha of the app code
+    # @param [String] tag the tag of the release
     # @return [Promise] promise that resolves when command finishes 
     #
-    buildImage: (sha) ->
-      @container.tag = sha.substring(0,8)
+    buildImage: (tag) ->
+      @container.tag = tag
       @spawn(@buildImageCommand())
 
     # Generates the `docker build` command.
