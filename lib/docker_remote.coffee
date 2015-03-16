@@ -19,6 +19,10 @@ class DockerRemote
 
     container
 
+  # Helps subclasses run system commands.
+  #
+  # @param [String] stdio "inherit" or "pipe"
+  #
   @spawn: (stdio="pipe") ->
     spawn = new DockerRemote.Spawn(stdio: stdio)
     spawn.spawn.bind(spawn)

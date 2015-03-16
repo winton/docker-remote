@@ -178,6 +178,8 @@ module.exports = (DockerRemote) ->
         promise = @spawn(@pushImageCommand())
         for tag in @container.tags
           promise = promise.then => @spawn(@pushImageCommand(tag))
+      
+      promise
 
     # Generates the `docker push` command.
     #
