@@ -26,6 +26,7 @@ module.exports = (DockerRemote) ->
       Env:   @envs()
       HostConfig:
         Binds: @binds()
+        Links: @container.links
         PortBindings: @portBindings()
       ExposedPorts: @exposedPorts()
 
@@ -50,6 +51,10 @@ module.exports = (DockerRemote) ->
       for env in @envs()
         params.push("-e")
         params.push(env)
+
+      for link in @container.links
+        params.push("-l")
+        params.push(link)
 
       for bind in @binds()
         params.push("-v")
