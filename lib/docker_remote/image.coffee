@@ -48,6 +48,9 @@ module.exports = (DockerRemote) ->
       props   = {}
       promise = null
 
+      if @container.buildStart
+        @container.buildStart(@container)
+
       if @container.dockerfile && @container.dockerfile.indexOf(".tmp/") == -1
         promise = Promise.resolve(@container.tags.shift())
       else
@@ -71,6 +74,10 @@ module.exports = (DockerRemote) ->
         => @tagContainer(props)
       ).then(
         => @pushImage(props)
+      ).then(
+        =>
+          if @container.buildEnd
+            @container.buildEnd(@container)
       )
 
     # Runs `docker build` on the app code.
