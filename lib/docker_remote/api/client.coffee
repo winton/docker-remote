@@ -60,12 +60,16 @@ module.exports = (DockerRemote) ->
           @authObject(params.fromImage)
           params
           (error, output) ->
-            output.on(
-              "data"
-              (buf) ->
-                response.push JSON.parse(buf.toString())
-            )
-            output.on("end", -> resolve(output))
+            if output
+              output.on(
+                "data"
+                (buf) ->
+                  response.push JSON.parse(buf.toString())
+              )
+              output.on("end", -> resolve(output))
+            else
+              resolve("")
+
         )
 
     # Read the .dockercfg from the home directory and parse it.
