@@ -12,7 +12,7 @@ class DockerRemote
     if container.git
       [ container.git, container.branch ] = container.git.split("#")
 
-    container.branch  ||= "master"
+    container.branch  ||= process.env.BRANCH || "master"
     container.links   ||= []
     container.ports   ||= []
     container.tags    ||= []
