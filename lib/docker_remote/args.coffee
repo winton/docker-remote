@@ -69,7 +69,7 @@ module.exports = (DockerRemote) ->
 
       params.push(@image())
 
-      if @container[@run_key]
+      if @container[@run_key] && !options.options_only
         run = @container[@run_key].slice()
         run[2] = "\"#{run[2]}\"" if "#{run[0..1]}" == "#{[ "sh", "-c" ]}"
         params = params.concat(run)
