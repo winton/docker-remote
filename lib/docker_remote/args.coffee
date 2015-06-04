@@ -1,3 +1,4 @@
+_    = require "lodash"
 path = require "path"
 
 module.exports = (DockerRemote) -> 
@@ -22,24 +23,31 @@ module.exports = (DockerRemote) ->
     apiParams: ->
       name:  @container.name
       Cmd:   @container[@run_key]
-      Image: @image()
       Env:   @envs()
+      Image: @image()
       HostConfig:
         Binds: @binds()
         Links: @container.links
         PortBindings: @portBindings()
+        VolumesFrom:  @container.vfrom
       ExposedPorts: @exposedPorts()
+      Volumes: @binds(true)
 
     # Generate binds option (which local directories to mount
     # within the container).
     #
     # @return [Object]
     #
-    binds: ->
-      @container.volumes.map (volume) ->
+    binds: (empty_volumes=false) ->
+      _.compact @container.volumes.map (volume) ->
         [ host, container ] = volume.split(":")
         host = path.resolve(host)
-        "#{host}:#{container}"
+        if container && !empty_volumes
+          "#{host}:#{container}"
+        else if !container && !empty_volumes
+          null
+        else
+          host
 
     # Generates parameters for a Docker CLI call.
     #
@@ -59,6 +67,10 @@ module.exports = (DockerRemote) ->
       for bind in @binds()
         params.push("-v")
         params.push(bind)
+
+      for vol in @container.vfrom
+        params.push("--volumes-from")
+        params.push(vol)
 
       for client_port, host_ports of @portBindings()
         for host_port in host_ports

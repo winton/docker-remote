@@ -16,6 +16,7 @@ class DockerRemote
     container.links   ||= []
     container.ports   ||= []
     container.tags    ||= []
+    container.vfrom   ||= []
     container.volumes ||= []
 
     container
