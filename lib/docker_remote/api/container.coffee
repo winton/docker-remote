@@ -18,7 +18,7 @@ module.exports = (DockerRemote) ->
     #
     containerApi: ->
       @find((container) =>
-        container.Names.indexOf("/#{@container.name}") > -1
+        container.Names && container.Names.indexOf("/#{@container.name}") > -1
       ).then (container) =>
         @client.getContainer(container.Id) if container
 
