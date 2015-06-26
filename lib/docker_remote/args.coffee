@@ -31,7 +31,7 @@ module.exports = (DockerRemote) ->
         PortBindings: @portBindings()
         VolumesFrom:  @container.vfrom
       ExposedPorts: @exposedPorts()
-      Volumes: @binds(true)
+      Volumes: @volumes()
 
     # Generate binds option (which local directories to mount
     # within the container).
@@ -124,3 +124,13 @@ module.exports = (DockerRemote) ->
         [ host_port, container_port ]  = port.split(":")
         ports["#{container_port}/tcp"] = [ HostPort: host_port ]
       ports
+
+    # Generate an object for the `Volumes` option of the Docker API.
+    #
+    # @return [Object]
+    #
+    volumes: ->
+      obj = {}
+      for volume in @binds(true)
+        obj[volume] = {}
+      obj
