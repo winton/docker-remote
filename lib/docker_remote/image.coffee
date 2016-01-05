@@ -99,20 +99,16 @@ module.exports = (DockerRemote) ->
     buildImageCommand: ->
       app_dir    = path.resolve @container.dockerfile
       app_dir  ||= ".tmp/#{@container.name}"
-      dockerfile = "#{app_dir}/Dockerfile.#{@container.env.ENV}"
+      dockerfile = "#{app_dir}/Dockerfile"
       seds       = []
 
       for key, value of @container.env
-        seds.push "sed -e 's/^ENV #{key} .*/ENV #{key} #{value}/g'"
+        seds.push "sed -i '' -e 's/^ENV #{key} .*/ENV #{key} #{value}/g' #{dockerfile}"
 
-      @spawn([ "sh", "-c"
-        """
-        cat #{app_dir}/Dockerfile | #{seds.join(" | ")} > #{dockerfile}
-        """
-      ]).then(=>
+      @spawn([ "sh", "-c", seds.join("; ") ])
+      .then(=>
         """
         docker build \
-          -f #{dockerfile} \
           -t #{@container.repo}:#{@container.tag} \
           #{app_dir}
         """
