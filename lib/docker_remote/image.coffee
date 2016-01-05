@@ -87,21 +87,36 @@ module.exports = (DockerRemote) ->
     #
     buildImage: (tag) ->
       @container.tag = tag
-      @spawn(@buildImageCommand())
+      
+      @buildImageCommand().then(
+        (output) => @spawn(output)
+      )
 
     # Generates the `docker build` command.
     #
     # @return [String] the docker build command
     #
     buildImageCommand: ->
-      app_dir   = path.resolve @container.dockerfile
-      app_dir ||= ".tmp/#{@container.name}"
+      app_dir    = path.resolve @container.dockerfile
+      app_dir  ||= ".tmp/#{@container.name}"
+      dockerfile = "#{app_dir}/Dockerfile.#{@container.env.ENV}"
+      seds       = []
 
-      """
-      docker build \
-        -t #{@container.repo}:#{@container.tag} \
-        #{app_dir}
-      """
+      for key, value of @container.env
+        seds.push "sed -e 's/^ENV #{key} .*/ENV #{key} #{value}/g'"
+
+      @spawn([ "sh", "-c"
+        """
+        cat #{app_dir}/Dockerfile | #{seds.join(" | ")} > #{dockerfile}
+        """
+      ]).then(=>
+        """
+        docker build \
+          -f #{dockerfile} \
+          -t #{@container.repo}:#{@container.tag} \
+          #{app_dir}
+        """
+      )
 
     # Check `docker ps` for the existence of a container sha.
     #
