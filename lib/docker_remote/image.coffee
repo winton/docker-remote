@@ -1,7 +1,7 @@
 Promise = require "bluebird"
 path    = require "path"
 
-module.exports = (DockerRemote) -> 
+module.exports = (DockerRemote) ->
 
   # Builds image from Dockerfile.
   #
@@ -31,7 +31,7 @@ module.exports = (DockerRemote) ->
     # Gets the sha of the app code.
     #
     # @return [Promise<String>] promise that resolves when command
-    #   finishes 
+    #   finishes
     #
     appSha: ->
       @spawnOut(
@@ -83,7 +83,7 @@ module.exports = (DockerRemote) ->
     # Runs `docker build` on the app code.
     #
     # @param [String] tag the tag of the release
-    # @return [Promise] promise that resolves when command finishes 
+    # @return [Promise] promise that resolves when command finishes
     #
     buildImage: (tag) ->
       @container.tag = tag
@@ -100,24 +100,22 @@ module.exports = (DockerRemote) ->
       app_dir    = path.resolve @container.dockerfile
       app_dir  ||= ".tmp/#{@container.name}"
       dockerfile = "#{app_dir}/Dockerfile"
-      seds       = []
+      build_args = []
 
-      for key, value of @container.env
-        seds.push "sed -i'' -e 's/^ENV #{key} .*/ENV #{key} #{value}/g' #{dockerfile}"
+      for key, value of @container.buildArgs || []
+        build_args.push "--build-arg #{key}=#{value}"
 
-      @spawn([ "sh", "-c", seds.join("; ") ])
-      .then(=>
-        """
-        docker build \
-          -t #{@container.repo}:#{@container.tag} \
-          #{app_dir}
-        """
-      )
+      """
+      docker build \
+        -t #{@container.repo}:#{@container.tag} \
+        #{build_args.join(" ")} \
+        #{app_dir}
+      """
 
     # Check `docker ps` for the existence of a container sha.
     #
     # @param [String] run_sha the sha of the container
-    # @return [Promise] promise that resolves when command finishes 
+    # @return [Promise] promise that resolves when command finishes
     #
     checkContainerSha: (run_sha) ->
       run_sha = run_sha.substring(0, 12)
@@ -150,7 +148,7 @@ module.exports = (DockerRemote) ->
 
     # Clone the app code into `.tmp`.
     #
-    # @return [Promise] promise that resolves when command finishes 
+    # @return [Promise] promise that resolves when command finishes
     #
     cloneApp: ->
       @spawnOut(@commands.clone_app)
@@ -181,7 +179,7 @@ module.exports = (DockerRemote) ->
 
     # Makes the directory to house the app code within `.tmp`.
     #
-    # @return [Promise] promise that resolves when command finishes 
+    # @return [Promise] promise that resolves when command finishes
     #
     mkdirApp: ->
       @spawnOut(@commands.mkdir_app)
@@ -189,14 +187,14 @@ module.exports = (DockerRemote) ->
     # Pushes the docker image to the registry.
     #
     # @param [Object] props shared properties from `build`
-    # @return [Promise] promise that resolves when command finishes 
+    # @return [Promise] promise that resolves when command finishes
     #
     pushImage: (props) ->
       if @container.push
         promise = @spawn(@pushImageCommand())
         for tag in @container.tags
           promise = promise.then => @spawn(@pushImageCommand(tag))
-      
+
       promise
 
     # Generates the `docker push` command.
@@ -209,7 +207,7 @@ module.exports = (DockerRemote) ->
 
     # Remove the app code in the `.tmp` directory.
     #
-    # @return [Promise] promise that resolves when command finishes 
+    # @return [Promise] promise that resolves when command finishes
     #
     rmrfApp: ->
       @spawnOut(@commands.rmrf_app)
@@ -217,7 +215,7 @@ module.exports = (DockerRemote) ->
     # Run the post build command.
     #
     # @param [Object] props shared properties from `build`
-    # @return [Promise] promise that resolves when command finishes 
+    # @return [Promise] promise that resolves when command finishes
     #
     runPostBuild: (props) ->
       container = new DockerRemote.Container(@container, "build")
