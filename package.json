@@ -1,6 +1,6 @@
 {
   "name": "docker-remote",
-  "version": "0.0.20",
+  "version": "0.0.23",
   "main": "lib/docker_remote.js",
   "dependencies": {
     "bluebird": "^2.3.11",

@@ -23,7 +23,8 @@ module.exports = (DockerRemote) ->
     # @return [ChildProcess]
     #
     childProcess: (cmd, options) ->
-      cmd = cmd.split(/\s+/)
+      if cmd.split
+        cmd = cmd.split(/\s+/)
 
       child_process.spawn(
         cmd.shift()
@@ -51,7 +52,7 @@ module.exports = (DockerRemote) ->
       options.stdio ||= @options.stdio
 
       @resolveCwd(options)
-
+      
       proc   = @childProcess(cmd, options)
       output = ""
 

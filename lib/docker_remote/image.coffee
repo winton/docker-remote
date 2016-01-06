@@ -87,17 +87,21 @@ module.exports = (DockerRemote) ->
     #
     buildImage: (tag) ->
       @container.tag = tag
-      @spawn(@buildImageCommand())
+      
+      @buildImageCommand().then(
+        (output) => @spawn(output)
+      )
 
     # Generates the `docker build` command.
     #
     # @return [String] the docker build command
     #
     buildImageCommand: ->
-      app_dir   = path.resolve @container.dockerfile
-      app_dir ||= ".tmp/#{@container.name}"
-
+      app_dir    = path.resolve @container.dockerfile
+      app_dir  ||= ".tmp/#{@container.name}"
+      dockerfile = "#{app_dir}/Dockerfile"
       build_args = []
+
       for key, value of @container.buildArgs || []
         build_args.push "--build-arg #{key}=#{value}"
 
