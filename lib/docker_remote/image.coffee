@@ -103,7 +103,7 @@ module.exports = (DockerRemote) ->
       seds       = []
 
       for key, value of @container.env
-        seds.push "sed -i '' -e 's/^ENV #{key} .*/ENV #{key} #{value}/g' #{dockerfile}"
+        seds.push "sed -i'' -e 's/^ENV #{key} .*/ENV #{key} #{value}/g' #{dockerfile}"
 
       @spawn([ "sh", "-c", seds.join("; ") ])
       .then(=>
