@@ -87,10 +87,7 @@ module.exports = (DockerRemote) ->
     #
     buildImage: (tag) ->
       @container.tag = tag
-      
-      @buildImageCommand().then(
-        (output) => @spawn(output)
-      )
+      @spawn(@buildImageCommand())
 
     # Generates the `docker build` command.
     #
