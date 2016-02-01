@@ -1,3 +1,4 @@
+_ = require "lodash"
 Promise      = require("bluebird")
 DockerRemote = require("../../../lib/docker_remote")
 
@@ -5,12 +6,13 @@ describe "Sidekick", ->
 
   beforeAll ->
     @subject = new DockerRemote.Args(
-      name: "test"
+      name:  "test"
+      git:   "git@github.com:winton/docker-remote.git"
+      repo:  "quay.io/winton/docker-remote"
+      ports: [ 80, "22:22", "8889:8889/udp", "127.0.0.1::8899" ]
       env:
         DOCKER_SOCKET_PATH: "/var/run"
         ENV: "production"
-      git:  "git@github.com:winton/docker-remote.git"
-      repo: "quay.io/winton/docker-remote"
     )
 
   describe "cliParams", ->
@@ -19,15 +21,23 @@ describe "Sidekick", ->
       @subject = @subject.cliParams()
 
     it "generates CLI parameters", ->
-      expect(@subject).toEqual([
-        '--name',
-        'test',
-        '-e',
-        'DOCKER_SOCKET_PATH=/var/run',
-        '-e',
-        'ENV=production',
+      expect(@subject).toEqual [
+        '--name'
+        'test'
+        '-e'
+        'DOCKER_SOCKET_PATH=/var/run'
+        '-e'
+        'ENV=production'
+        '-p'
+        '80/tcp'
+        '-p'
+        '22:22/tcp'
+        '-p'
+        '8889:8889/udp'
+        '-p'
+        '127.0.0.1::8899/tcp'
         'quay.io/winton/docker-remote:latest'
-      ])
+      ]
 
   describe "apiParams", ->
 
@@ -35,7 +45,7 @@ describe "Sidekick", ->
       @subject = @subject.apiParams()
 
     it "generates API parameters", ->
-      expect(@subject).toEqual(
+      expect(@subject).toEqual
         name: 'test'
         Cmd: undefined
         Image: 'quay.io/winton/docker-remote:latest'
@@ -45,6 +55,14 @@ describe "Sidekick", ->
         ]
         HostConfig:
           Binds: []
-          PortBindings: {}
-        ExposedPorts: {}
-      )  
+          Links: []
+          VolumesFrom: []
+          PortBindings:
+            "22/tcp":   [HostPort: "22"]
+            "8889/udp": [HostPort: "8889"]
+        ExposedPorts:
+          "80/tcp":   {}
+          "22/tcp":   {}
+          "8889/udp": {}
+          "8899/tcp": {}
+        Volumes: {}

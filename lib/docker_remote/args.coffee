@@ -1,7 +1,7 @@
 _    = require "lodash"
 path = require "path"
 
-module.exports = (DockerRemote) -> 
+module.exports = (DockerRemote) ->
 
   # Generates arguments for Docker CLI and remote API.
   #
@@ -28,9 +28,9 @@ module.exports = (DockerRemote) ->
       HostConfig:
         Binds: @binds()
         Links: @container.links
-        PortBindings: @portBindings()
+        PortBindings: @apiPortBindings()
         VolumesFrom:  @container.vfrom
-      ExposedPorts: @exposedPorts()
+      ExposedPorts: @apiExposedPorts()
       Volumes: @volumes()
 
     # Generate binds option (which local directories to mount
@@ -72,12 +72,14 @@ module.exports = (DockerRemote) ->
         params.push("--volumes-from")
         params.push(vol)
 
-      for client_port, host_ports of @portBindings()
-        for host_port in host_ports
-          params.push("-p")
-          params.push(
-            "#{host_port.HostPort}:#{client_port.split("/")[0]}"
-          )
+      for {ip, client_port, host_port, proto} in @ports()
+        params.push "-p"
+        params.push(
+          if ip?
+            "#{[ip, host_port, client_port].join(":")}/#{proto}"
+          else
+            "#{[host_port, client_port].filter((v) -> v).join(":")}/#{proto}"
+        )
 
       params.push(@image())
 
@@ -93,37 +95,54 @@ module.exports = (DockerRemote) ->
     # @return [Array<String>] an array of strings in "VAR=var" format
     #
     envs: ->
-      envs = []
-
       for key, value of @container.env
-        envs.push("#{key}=#{value}")
-
-      envs
-
-    # Generate an object for the `ExposedPorts` option of the Docker
-    # API.
-    #
-    # @return [Object]
-    #
-    exposedPorts: ->
-      ports = @portBindings(@name)
-      ports[key] = {} for key, value of ports
-      ports
+        "#{key.toUpperCase()}=#{value}"
 
     image: ->
-      "#{@container.repo}:#{@container.tags[0]}"
+      "#{@container.repo}:#{@container.tags[0] || "latest"}"
 
-    # Generate an object for the `PortBindings` option of the
-    # Docker API.
+    # Generate an object that specifies the ports configuration
     #
-    # @return [Object]
+    # @ return [Object] an array of objects representing the port config
     #
-    portBindings: ->
-      ports = {}
+    ports: ->
       for port in @container.ports
-        [ host_port, container_port ]  = port.split(":")
-        ports["#{container_port}/tcp"] = [ HostPort: host_port ]
-      ports
+        [fragments..., last] = "#{port}".split(":")
+        [last, proto ]       = last.split("/")
+        fragments            = fragments.concat [last]
+        proto              ||= "tcp"
+
+        switch fragments.length
+          when 1
+            ip: null, host_port: null, client_port: port, proto: proto
+          when 2
+            ip: null
+            host_port: fragments[0]
+            client_port: fragments[1]
+            proto: proto
+          when 3
+            ip: fragments[0]
+            host_port: fragments[1]
+            client_port: fragments[2]
+            proto: proto
+
+    # Generates the PortBindings payload for API calls
+    #
+    # @return [Objects] an array adhering to the latest json representation
+    apiPortBindings: ->
+      _.fromPairs(
+        for {ip, host_port, client_port, proto} in @ports() when host_port? and host_port != ""
+          ["#{client_port}/#{proto}", [HostPort: host_port]]
+      )
+
+    # Generates the ExposedPorts payload for API calls
+    #
+    # @return [Objects] an array adhering to the latest json representation
+    apiExposedPorts: ->
+      _.fromPairs(
+        for {ip, host_port, client_port, proto} in @ports()
+          ["#{client_port}/#{proto}", {}]
+      )
 
     # Generate an object for the `Volumes` option of the Docker API.
     #
