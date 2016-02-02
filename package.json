@@ -18,5 +18,8 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/winton/docker-remote.git"
+  },
+  "scripts": {
+    "test": "jasmine"
   }
 }

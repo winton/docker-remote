@@ -30,6 +30,7 @@ module.exports = (DockerRemote) ->
         Links: @container.links
         PortBindings: @apiPortBindings()
         VolumesFrom:  @container.vfrom
+        NetworkMode: @container.network if @container.network
       ExposedPorts: @apiExposedPorts()
       Volumes: @volumes()
 
@@ -80,6 +81,8 @@ module.exports = (DockerRemote) ->
           else
             "#{[host_port, client_port].filter((v) -> v).join(":")}/#{proto}"
         )
+
+      params.push "--net=#{@container.network}" if @container.network
 
       params.push(@image())
 

@@ -33,7 +33,7 @@ module.exports = (DockerRemote) ->
       )
 
     # Find a Docker container.
-    # 
+    #
     # @param [Function] fn callback
     # @return [Promise<Container>]
     #
@@ -51,7 +51,7 @@ module.exports = (DockerRemote) ->
     list: (options) -> @client.listContainers(options)
 
     # Remove a Docker container.
-    # 
+    #
     # @param [Object] options parameters to `Dockerode::Container#remove`
     # @return [Object] response from `Dockerode::Container#remove`
     #
