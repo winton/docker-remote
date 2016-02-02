@@ -1,5 +1,5 @@
-module.exports = (DockerRemote) -> 
-  
+module.exports = (DockerRemote) ->
+
   # Namespace for DockerRemote.Api classes.
   #
   class DockerRemote.Api

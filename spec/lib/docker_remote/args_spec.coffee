@@ -6,10 +6,11 @@ describe "Sidekick", ->
 
   beforeAll ->
     @subject = new DockerRemote.Args(
-      name:  "test"
-      git:   "git@github.com:winton/docker-remote.git"
-      repo:  "quay.io/winton/docker-remote"
-      ports: [ 80, "22:22", "8889:8889/udp", "127.0.0.1::8899" ]
+      name:    "test"
+      git:     "git@github.com:winton/docker-remote.git"
+      repo:    "quay.io/winton/docker-remote"
+      ports:   [ 80, "22:22", "8889:8889/udp", "127.0.0.1::8899" ]
+      network: "testnet"
       env:
         DOCKER_SOCKET_PATH: "/var/run"
         ENV: "production"
@@ -36,6 +37,7 @@ describe "Sidekick", ->
         '8889:8889/udp'
         '-p'
         '127.0.0.1::8899/tcp'
+        '--net=testnet'
         'quay.io/winton/docker-remote:latest'
       ]
 
@@ -57,6 +59,7 @@ describe "Sidekick", ->
           Binds: []
           Links: []
           VolumesFrom: []
+          NetworkMode: "testnet"
           PortBindings:
             "22/tcp":   [HostPort: "22"]
             "8889/udp": [HostPort: "8889"]
