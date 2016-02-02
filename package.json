@@ -6,7 +6,7 @@
     "bluebird": "^2.3.11",
     "coffee-script": "^1.8.0",
     "dockerode": "^2.0.4",
-    "lodash": "^3.9.3"
+    "lodash": "^4.1.0"
   },
   "devDependencies": {
     "codo": "",
