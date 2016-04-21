@@ -88,7 +88,7 @@ module.exports = (DockerRemote) ->
     buildImage: (tag) ->
       @container.tag = tag
       if @container.env?.ENV
-        @container.tag = "#{@container.env?.ENV}:#{tag}"
+        @container.tag = "#{@container.env?.ENV}-#{tag}"
       @spawn(@buildImageCommand())
 
     # Generates the `docker build` command.
@@ -192,6 +192,7 @@ module.exports = (DockerRemote) ->
       if @container.push
         promise = @spawn(@pushImageCommand())
         for tag in @container.tags
+          promise = promise.then => @spawn(@pushImageCommand("#{tag}-last"))
           promise = promise.then => @spawn(@pushImageCommand(tag))
 
       promise
@@ -247,7 +248,7 @@ module.exports = (DockerRemote) ->
       promise = Promise.resolve()
       for tag in @container.tags
         promise = promise.then =>
-          @spawnOut(@tagCommand(tag, "#{tag}:last"))
+          @spawnOut(@tagCommand(tag, "#{tag}-last"))
         promise = promise.then =>
           @spawnOut(@tagCommand(@container.tag, tag))
 
