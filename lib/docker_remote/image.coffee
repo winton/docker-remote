@@ -234,7 +234,7 @@ module.exports = (DockerRemote) ->
     #
     tagCommand: (source, dest) ->
       """
-      docker tag -f \
+      docker tag \
         #{@container.repo}:#{source} \
         #{@container.repo}:#{dest}
       """
