@@ -87,7 +87,7 @@ module.exports = (DockerRemote) ->
     #
     buildImage: (tag) ->
       @container.tag = tag
-      if @container.env?.ENV
+      if @container.env?.ENV and tag is not "development"
         @container.tag = "#{@container.env?.ENV}-#{tag}"
       @spawn(@buildImageCommand())
 
